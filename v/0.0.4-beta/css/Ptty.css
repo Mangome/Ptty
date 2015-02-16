@@ -1,0 +1,169 @@
+/**
+ * @file   : Ptty.css
+ * @ver    : 0.0.4
+ * @Author : Patxi Pierce
+ * @url    : http://code.patxipierce.com/jquery-plugin/ptty/
+ * @desc   : Ptty (Pachanka's teletype). A terminal emulator plugin for jQuery. 
+ *           Based on wterm.js by Venkatakrishnan Ganesh.
+ * @license: Copyright 2014 Patxi Pierce <mail@patxipierce.com>
+ *           This work is free. You can redistribute it and/or modify it under the
+ *           terms of the Do What The Fuck You Want To Public License, Version 2,
+ *           as published by Sam Hocevar. See the COPYING file for more details.
+ **/
+
+/****
+*
+* Basic Ptty CSS
+*
+*****/
+
+.cmd_terminal {
+    display: block;
+    background-color: #aaa;
+    color: #fff;
+    font-size: 12px;
+    font-family: monospace,FreeMono,Monaco,Fixed,"Menlo Regular","Lucida Console","Courier New";
+    overflow-x: none; overflow-y: auto;
+}
+.cmd_terminal div { 
+    clear: both;
+    padding: 0 12px; line-height: 18px;
+    white-space: pre-wrap; word-wrap: break-word;
+}
+.cmd_terminal div:first {
+    margin-bottom: 1em;
+}
+.cmd_terminal .cmd_terminal_content {
+    margin: 10px 0 0 0;
+}
+.cmd_terminal .cmd_terminal_prompt {
+    position: relative; overflow: hidden;
+}
+.cmd_terminal_input {
+    width: 100%; outline: 0; 
+    /* Set the browser cursor to transparent*/
+    color: rgba(0,0,0,0);
+    /* Text will show through its shadow. Buggy in IE10 & iOS */
+    text-shadow: 0px 0px 0px rgba(255,255,255,0.8); 
+}
+.cmd_terminal_input[contenteditable="true"] {
+    white-space: pre-wrap; word-wrap: break-word; overflow: hidden;
+} 
+.cmd_terminal_input[contenteditable="true"] br {
+    display:none;
+}
+.cmd_terminal_input[contenteditable="true"] * {
+    white-space: pre-wrap; word-wrap: break-word; display:inline;
+}
+.cmd_terminal .upl_container input[type=file] {
+    position: relative;
+    top: 0;
+    width: 220px;
+}
+.cmd_terminal input[type=password].hide,
+.cmd_terminal input[type=text].hide, 
+.cmd_terminal .upl_container.hide {
+    /* position: fixed; bottom: 0; left: 0; opacity: 0.001; width: 2px; */
+    position: absolute; top: -5000px;
+}
+    /* Lists: vertical, horizontal and square. */
+.cmd_terminal ul { white-space: normal; }
+.cmd_terminal ul li { list-style: none; }
+.cmd_terminal ul.ve-li{ display: inherit; }
+.cmd_terminal ul.ho-li li{ display: inline; }
+.cmd_terminal ul.sq-li li{
+    min-width: 175px;
+    min-height: 20px;
+    display: -moz-inline-stack; 
+    display: inline-block;
+    vertical-align: top;
+    margin: 2px;
+    zoom: 1;
+    *display: inline;
+    _height: 20px; 
+}
+
+/****
+*
+* "boring" Theme.
+* Copy this code bellow to make your own theme!
+*
+*****/
+
+    /* Define the color and background of your terminal */
+.cmd_terminal_theme_boring { background-color: #0a0a0a; color: #ddd; letter-spacing: 1px; }
+    /* Reverse the background and forground */
+.cmd_terminal_theme_boring *::-moz-selection { color: #0a0a0a; background-color: #ddd; }
+    /* Current command prompt */
+.cmd_terminal_theme_boring .cmd_terminal_active { font-weight: bold; }
+    /* Main command prompt */
+.cmd_terminal_theme_boring .cmd_terminal_ps::before { content: ">"; }
+    /* Prompt for sub-programmes */
+.cmd_terminal_theme_boring .cmd_terminal_sub::after { content: "\0000a0>"; }
+    /* hover cursor symbol */
+.cmd_terminal_theme_boring .cmd_terminal_cursor.hover::after { content: "▮";}
+    /* hout cursor symbol */
+.cmd_terminal_theme_boring .cmd_terminal_cursor::after { content: "▯";}
+.cmd_terminal_theme_boring .cmd_terminal_cursor {
+    font-size: 200%; color: #fff; line-height: 1px; overflow: visible;
+}
+
+/****
+*
+* Loading...
+*
+*****/
+
+.cmd_terminal_loading,
+.cmd_terminal_progress {
+    position: fixed;
+    display: none;
+    padding: 0 35px;
+}
+    /* Edit the unicode content to make different loading spinners. 
+    Try: (U+25F4) ◴ (U+25E1) ◡ (U+25D4) ◔ (U+2699) ⚙ */
+.cmd_terminal_loading span::after { content: "⚙" }
+
+.cmd_terminal_loading span{
+    display: block;
+    font-size: 8em;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    border-radius: 25px;
+    margin: auto;
+    position: relative;
+    top: 40%;
+    opacity: 0.4;
+}
+
+/****
+*
+* Animations.
+*
+*****/
+
+    /* Cursor blink animation */
+.cmd_terminal_cursor.blink {
+    -webkit-transition: all 1s ease-in-out; -moz-transition: all 1s ease-in-out; -o-transition: all 1s ease-in-out; -ms-transition: all 1s ease-in-out; transition: all 1s ease-in-out;
+    -webkit-animation-direction: normal; -webkit-animation-duration: 2s; -webkit-animation-iteration-count: infinite; -webkit-animation-name: blink; -webkit-animation-timing-function: ease-in-out;
+    -moz-animation-direction: normal; -moz-animation-duration: 2s; -moz-animation-iteration-count: infinite; -moz-animation-name: blink; -moz-animation-timing-function: ease-in-out;
+}
+@-webkit-keyframes blink { 0% { opacity:1; } 50% { opacity:0; } 100% { opacity:1; } }
+@-moz-keyframes blink { 0% { opacity:1; } 50% { opacity:0; } 100% { opacity:1; } }
+@-ms-keyframes blink { 0% { opacity:1; } 50% { opacity:0; } 100% { opacity:1; } }
+@-o-keyframes blink { 0% { opacity:1; } 50% { opacity:0; } 100% { opacity:1; } }
+@keyframes blink {  0% { opacity:1; } 50% { opacity:0; } 100% { opacity:1; } }
+
+    /* Loading spin animation */
+.cmd_terminal_loading span{
+    -webkit-animation: spin 4s linear infinite;
+    -moz-animation: spin 4s linear infinite;
+    -ms-animation: spin 4s linear infinite;
+    -o-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
+}
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@-ms-keyframes spin { 100% { -ms-transform: rotate(360deg); } }
+@-o-keyframes spin { 100% { -o-transform: rotate(360deg); } }
+@keyframes spin { 100% { transform:rotate(360deg); } }

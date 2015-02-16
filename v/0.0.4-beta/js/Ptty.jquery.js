@@ -1,6 +1,6 @@
 /**
  * @file   : Ptty.jquery.js
- * @ver    : 0.0.3
+ * @ver    : 0.0.4
  * @Author : Patxi Pierce
  * @url    : http://code.patxipierce.com/jquery-plugin/ptty/
  * @desc   : Ptty (Pachanka's teletype). A terminal emulator plugin for jQuery. 
@@ -14,7 +14,7 @@
 
 ( function( $ ) {
      
-    var version = '0.0.3';
+    var version = '0.0.4';
 
     /**
     * @function : get_defaults
@@ -36,10 +36,7 @@
             // Class of the the primary terminal container
             tty_class    : 'cmd_terminal',
 
-            // ps : The Primary Prompt (it's better to edit this using css)
-            ps           : '',
-
-            // The theme that is applied by default
+            // The theme that is applied by default. See Ptty.css
             theme        : 'boring',
 
             // Explicitly set width and height of the terminal
@@ -50,8 +47,8 @@
             // Message to be shown when the terminal is first 
             welcome      : 'Ptty v.' + version,
 
-            // The password placeholder symbol
-            placeholder  : '*',
+            // The password placeholder symbol ● (U+25CF) or *.
+            placeholder  : '●',
 
             // When command is not found: "CMD" will be replaced
             not_found    : '<div> CMD: Command Not Found </div>',
@@ -214,7 +211,7 @@
         var settings = get_defaults();
         $.extend( true, settings, options );
 
-        // jQuery Plugin
+        // jQuery Plugin:
         return this.each( function() {
 
             var element  = $( this );
@@ -227,25 +224,36 @@
                 element.css( { width: settings.width, height: settings.height } );
             }
 
-            element.html( '' ).append( '<div class="'+settings.tty_class+'_loading"><span></span></div>'
+            element.html( '' ).append( ''
+            + '<div class="'+settings.tty_class+'_loading"><span></span></div>'
             + '<div class="' + settings.tty_class + '_content"><div>' + settings.welcome + '</div></div>'
-            + '<div class="' + settings.tty_class + '_prompt"><span class="' + settings.tty_class + '_ps">'
-            + '<span class="' + settings.tty_class + '_active">' + settings.ps + '</span>&nbsp;</span>'
-            + '<form accept-charset="'+settings.charset+'" enctype="'+settings.enctype+'">'
-            + '<input type="text" autocomplete="off" /><input type="password" />'
-            + '<span class="upl_container hide"><input type="file" /><a href="javascript:void(0)" '
-            + 'onclick="$(this).parent().addClass(\'hide\').siblings(\'input[type=text]\').show();">Cancel</a></span>'
-            + '</form><progress class="' + settings.tty_class + '_progress"></progress></div>');
+            + '<div class="' + settings.tty_class + '_prompt">'
+                + '<div class="' + settings.tty_class + '_ps">'
+                    + '<span class="' + settings.tty_class + '_active"></span>'
+                    + '<span class="' + settings.tty_class + '_input" contenteditable="true"></span>'
+                    + '<span class="' + settings.tty_class + '_cursor"></span>'
+                +'</div>'
+                + '<form accept-charset="'+settings.charset+'" enctype="'+settings.enctype+'">'
+                    + '<input type="text" autocomplete="off" class="hide" />'
+                    + '<input type="password" class="hide" />'
+                    + '<span class="upl_container hide"><input type="file" /><a href="javascript:void(0)" onclick="$(this).parent().addClass(\'hide\').siblings(\'input[type=text]\').show();">Cancel</a></span>'
+                + '</form>'
+                + '<progress class="' + settings.tty_class + '_progress"></progress>'
+            + '</div>');
             
             // Representing prompt, form, input and content section in the terminal
             var prompt     = element.find( 'span.' + settings.tty_class + '_active' );
-            var input_form = element.find( 'div:last form' );
-            var input      = input_form.find( 'input' );
-            var txt_input  = input_form.find( 'input[type=text]' );
-            var psw_input  = input_form.find( 'input[type=password]' );
-            var upl_input  = input_form.find( 'input[type=file]' );
+
             var content    = element.find( 'div.' + settings.tty_class + '_content' );
             var loading    = element.find( 'div.' + settings.tty_class + '_loading' );
+
+            var input      = element.find( '.' + settings.tty_class + '_input' );
+            var cursor     = element.find( '.' + settings.tty_class + '_cursor' );
+            
+            var input_form = element.find( 'div:last form' );
+            var txt_input  = input_form.find( 'input[type=text]' );
+            var psw_input  = input_form.find( 'input[type=password]' );
+            var upl_input  = input_form.find( 'input[type=file]' );            
             
             // Custom Dispatcher
             var cdispatch  = null;
@@ -253,16 +261,45 @@
             // Storage for autocomplete and history
             var saved      = { ac_save : null, h_save : null };
 
+            // Helpers:
+
+            // Function to focus at the end of a contenteditable
+            var input_focus = function() { 
+                input.focus();
+                var tmp = $('<span />').appendTo(input),
+                    node = tmp.get(0),
+                    range = null,
+                    sel = null;
+
+                if (document.selection) {
+                    range = document.body.createTextRange();
+                    range.moveToElementText(node);
+                    range.select();
+                } else if (window.getSelection) {
+                    range = document.createRange();
+                    range.selectNode(node);
+                    sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+                tmp.remove();
+            }
+
             // Set cursor on the prompt
             if(settings.autofocus){
-                txt_input.focus();
+                input_focus();
             }
+
             element.bind('select focus click', function(){
-                if(txt_input.is(':visible')){
-                    txt_input.focus();
-                }else if(psw_input.is(':visible')){
-                    psw_input.focus();
-                }
+                input_focus();
+            });
+
+            element.hover(
+                function(){ 
+                    cursor.addClass('hover blink');
+                    input_focus();
+                }, function(){ 
+                    cursor.removeClass('hover blink'); 
             });
             
             // Make sure prompt is enabled
@@ -765,6 +802,9 @@
             * @event_handler
             **/
             txt_input.keydown( function( e ) {
+                // Copy from hidden input to span
+                //$('.' + settings.tty_class + '_input').text( $(this).val() );
+                
                 var keycode = e.keyCode;
                 switch( keycode ) {
                     // Command Completion Tab

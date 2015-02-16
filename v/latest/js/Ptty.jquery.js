@@ -9,7 +9,6 @@
  *           This work is free. You can redistribute it and/or modify it under the
  *           terms of the Do What The Fuck You Want To Public License, Version 2,
  *           as published by Sam Hocevar. See the COPYING file for more details.
- *
  * */
 
 ( function( $ ) {
@@ -742,6 +741,8 @@
                     // Decode before inserting
                     history.push( $.trim($('<div/>').html(value).text()) );
                 }
+                // Reset history (thanks @Mangome)
+                hcurrent = 0;
 
                 // Activate loading
                 loading.show();
@@ -916,7 +917,7 @@
     * @method : set_command_option
     * @public
     * @desc   : Edits the cmd_opts property.
-    * @option_obj : An object containing any of the cmd_opts atributes.
+    * @option_obj : An object containing any of the cmd_opts attributes.
     **/
     $.set_command_option = function( option_obj ){
         $.extend( true, cmd_opts, option_obj );
